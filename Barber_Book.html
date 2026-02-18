@@ -119,6 +119,12 @@ function submitForm() {
   let service = document.getElementById("service").value.trim();
   let time = document.getElementById("time").value.trim();
 
+var now = Utilities.formatDate(
+  new Date(),
+  Session.getScriptTimeZone(),
+  "dd-MM-yyyy HH:mm:ss"
+);
+
   if (!name || !service || !time) {
     alert("Please fill all fields");
     return;
@@ -142,7 +148,8 @@ function submitForm() {
   body: JSON.stringify({
     Name: name,
     Service: service,
-    Time: time
+    Time: time,
+    Date:now
   })
 });
 
