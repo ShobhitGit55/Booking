@@ -112,24 +112,46 @@ document.getElementById("tableBody").innerHTML = table;
 });
 }
 
-function submitForm(){
-let name = document.getElementById("name").value;
-let service = document.getElementById("service").value;
-let time = document.getElementById("time").value;
+function submitForm() {
+  let name = document.getElementById("name").value;
+  let service = document.getElementById("service").value;
+  let time = document.getElementById("time").value;
 
-fetch(API_URL, {
-  method: "POST",
-  body: JSON.stringify({
-    Name: name,
-    Service: service,
-    Time: time
-  })
-})
-.then(response => response.text())
-.then(result => {
-  loadData();
-})
-.catch(error => console.error("Error:", error));
+  if (!name || !service || !time) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  // Step 1: Get existing bookings
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+
+      // Step 2: Check if time already booked
+      let alreadyBooked = data.some(item => item.Time === time);
+
+      if (alreadyBooked) {
+        alert("This time slot is already booked!");
+        return;
+      }
+
+      // Step 3: If not booked, save booking
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          Name: name,
+          Service: service,
+          Time: time
+        })
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert("Appointment Booked!");
+        loadData();
+      });
+
+    })
+    .catch(error => console.error("Error:", error));
 }
 loadData();
 
