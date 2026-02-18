@@ -9,57 +9,52 @@
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #667eea, #764ba2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+    padding: 40px;
 }
 
 .container {
     background: white;
     padding: 30px;
     border-radius: 12px;
-    width: 350px;
+    max-width: 600px;
+    margin: auto;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 h2 {
     text-align: center;
-    margin-bottom: 20px;
-    color: #333;
 }
 
 input, select {
     width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+    margin-bottom: 10px;
 }
 
 button {
     width: 100%;
-    padding: 12px;
-    border: none;
+    padding: 10px;
     background: #667eea;
     color: white;
-    font-size: 16px;
-    border-radius: 6px;
+    border: none;
     cursor: pointer;
-    transition: 0.3s;
 }
 
-button:hover {
-    background: #5a67d8;
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
 }
 
-.success {
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
     text-align: center;
-    margin-top: 15px;
-    color: green;
-    display: none;
+}
+
+th {
+    background: #667eea;
+    color: white;
 }
 </style>
 </head>
@@ -67,67 +62,72 @@ button:hover {
 <body>
 
 <div class="container">
-    <h2>Book Appointment</h2>
+<h2>Book Appointment</h2>
 
-    <input type="text" id="name" placeholder="Enter Your Name" required>
-    
-    <select id="service">
-        <option value="">Select Service</option>
-        <option>Haircut</option>
-        <option>Massage</option>
-        <option>Gym Session</option>
-        <option>Consultation</option>
-    </select>
+<input type="text" id="name" placeholder="Name">
+<select id="service">
+<option value="">Select Service</option>
+<option>Haircut</option>
+<option>Massage</option>
+<option>Gym</option>
+<option>Consultation</option>
+</select>
+<input type="time" id="time">
 
-    <input type="time" id="time" required>
+<button onclick="submitForm()">Book</button>
 
-    <button onclick="submitForm()">Book Now</button>
+<h2>All Appointments</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Service</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+</tbody>
+</table>
 
-    <div class="success" id="successMsg">
-        Appointment Booked Successfully!
-    </div>
 </div>
 
 <script>
 
- const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec
-";
+const API_URL = "YOUR_GOOGLE_SCRIPT_URL";
 
-function submitForm() {
-
-    let name = document.getElementById("name").value;
-    let service = document.getElementById("service").value;
-    let time = document.getElementById("time").value;
-
-    if(name === "" || service === "" || time === "") {
-        alert("Please fill all fields");
-        return;
-    }
-
-    fetch(API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            Name: name,
-            Service: service,
-            Time: time
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("successMsg").style.display = "block";
-        document.getElementById("name").value = "";
-        document.getElementById("service").value = "";
-        document.getElementById("time").value = "";
-    })
-    .catch(error => {
-        alert("Error submitting form");
-        console.log(error);
-    });
-
+function loadData(){
+fetch(API_URL)
+.then(res => res.json())
+.then(data => {
+let table = "";
+data.forEach(item => {
+table += `<tr>
+<td>${item.Name}</td>
+<td>${item.Service}</td>
+<td>${item.Time}</td>
+</tr>`;
+});
+document.getElementById("tableBody").innerHTML = table;
+});
 }
+
+function submitForm(){
+let name = document.getElementById("name").value;
+let service = document.getElementById("service").value;
+let time = document.getElementById("time").value;
+
+fetch(API_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body: JSON.stringify({Name:name, Service:service, Time:time})
+})
+.then(res => res.json())
+.then(data => {
+loadData();
+});
+}
+
+loadData();
 
 </script>
 
