@@ -115,7 +115,6 @@ function loadData() {
 }
 
 function submitForm() {
-
   let name = document.getElementById("name").value.trim();
   let service = document.getElementById("service").value.trim();
   let time = document.getElementById("time").value.trim();
@@ -129,7 +128,6 @@ function submitForm() {
     .then(res => res.json())
     .then(data => {
 
-      // Check if time already booked
       let alreadyBooked = data.some(item => 
         String(item.Time).trim() === time
       );
@@ -139,28 +137,34 @@ function submitForm() {
         return;
       }
 
-      // Save new booking
       return fetch(API_URL, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           Name: name,
           Service: service,
-          Time: time   // Saved as pure string
+          Time: time   // ✅ send as normal string
         })
       });
 
     })
     .then(response => {
       if (response) {
-        alert("Appointment Booked Successfully!");
+        alert("Appointment Booked!");
+
+        // ✅ CLEAR FIELDS HERE
         document.getElementById("name").value = "";
         document.getElementById("service").value = "";
         document.getElementById("time").value = "";
+
         loadData();
       }
     })
     .catch(error => console.error("Error:", error));
 }
+
 
 // Auto load when page opens
 loadData();
