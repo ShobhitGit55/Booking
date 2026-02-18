@@ -95,65 +95,67 @@ th {
 
 const API_URL="https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
 
-
-function loadData(){
-fetch(API_URL)
-.then(res => res.json())
-.then(data => {
-let table = "";
-data.forEach(item => {
-table += `<tr>
-<td>${item.Name}</td>
-<td>${item.Service}</td>
-<td>${item.Time}</td>
-</tr>`;
-});
-document.getElementById("tableBody").innerHTML = table;
-});
+function loadData() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      let table = "";
+      data.forEach(item => {
+        table += `<tr>
+          <td>${item.Name}</td>
+          <td>${item.Service}</td>
+          <td>${item.Time}</td>
+        </tr>`;
+      });
+      document.getElementById("tableBody").innerHTML = table;
+    })
+    .catch(error => console.error("Load Error:", error));
 }
 
 function submitForm() {
-  let name = document.getElementById("name").value;
-  let service = document.getElementById("service").value;
-  let time = document.getElementById("time").value;
+  let name = document.getElementById("name").value.trim();
+  let service = document.getElementById("service").value.trim();
+  let time = document.getElementById("time").value.trim();
 
   if (!name || !service || !time) {
     alert("Please fill all fields");
     return;
   }
 
-  // Step 1: Get existing bookings
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
 
-      // Step 2: Check if time already booked
-      let alreadyBooked = data.some(item => item.Time === time);
+      let alreadyBooked = data.some(item => 
+        String(item.Time).trim() === time
+      );
 
       if (alreadyBooked) {
         alert("This time slot is already booked!");
         return;
       }
 
-      // Step 3: If not booked, save booking
-      fetch(API_URL, {
+      return fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({
           Name: name,
           Service: service,
           Time: time
         })
-      })
-      .then(response => response.text())
-      .then(result => {
-        alert("Appointment Booked!");
-        loadData();
       });
 
     })
+    .then(response => {
+      if (response) {
+        alert("Appointment Booked!");
+        loadData();
+      }
+    })
     .catch(error => console.error("Error:", error));
 }
+
 loadData();
+
 
 </script>
 
