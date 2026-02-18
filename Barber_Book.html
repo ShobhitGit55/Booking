@@ -93,26 +93,29 @@ th {
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
 
 function loadData() {
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
       let table = "";
+
       data.forEach(item => {
         table += `<tr>
-          <td>${item.Name}</td>
-          <td>${item.Service}</td>
-          <td>${item.Time}</td>
+          <td>${String(item.Name)}</td>
+          <td>${String(item.Service)}</td>
+          <td>${String(item.Time)}</td>
         </tr>`;
       });
+
       document.getElementById("tableBody").innerHTML = table;
     })
     .catch(error => console.error("Load Error:", error));
 }
 
 function submitForm() {
+
   let name = document.getElementById("name").value.trim();
   let service = document.getElementById("service").value.trim();
   let time = document.getElementById("time").value.trim();
@@ -126,6 +129,7 @@ function submitForm() {
     .then(res => res.json())
     .then(data => {
 
+      // Check if time already booked
       let alreadyBooked = data.some(item => 
         String(item.Time).trim() === time
       );
@@ -135,29 +139,34 @@ function submitForm() {
         return;
       }
 
+      // Save new booking
       return fetch(API_URL, {
         method: "POST",
         body: JSON.stringify({
           Name: name,
           Service: service,
-         Time: "'" + time 
+          Time: time   // Saved as pure string
         })
       });
 
     })
     .then(response => {
       if (response) {
-        alert("Appointment Booked!");
+        alert("Appointment Booked Successfully!");
+        document.getElementById("name").value = "";
+        document.getElementById("service").value = "";
+        document.getElementById("time").value = "";
         loadData();
       }
     })
     .catch(error => console.error("Error:", error));
 }
 
+// Auto load when page opens
 loadData();
 
-
 </script>
+
 
 </body>
 </html>
