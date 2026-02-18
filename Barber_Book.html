@@ -117,17 +117,19 @@ let name = document.getElementById("name").value;
 let service = document.getElementById("service").value;
 let time = document.getElementById("time").value;
 
-fetch(API_URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body: JSON.stringify({Name:name, Service:service, Time:time})
+fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({
+    Name: name,
+    Service: service,
+    Time: time
+  })
 })
-.then(res => res.json())
-.then(data => {
-loadData();
-});
-}
-
+.then(response => response.text())
+.then(result => {
+  loadData();
+})
+.catch(error => console.error("Error:", error));
 loadData();
 
 </script>
