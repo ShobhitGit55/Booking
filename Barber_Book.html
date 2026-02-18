@@ -137,17 +137,15 @@ function submitForm() {
         return;
       }
 
-      return fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          Name: name,
-          Service: service,
-          Time: time   // ✅ send as normal string
-        })
-      });
+     return fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({
+    Name: name,
+    Service: service,
+    Time: time
+  })
+});
+
 
     })
     .then(response => {
