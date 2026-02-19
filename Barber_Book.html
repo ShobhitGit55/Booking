@@ -214,7 +214,7 @@ function submitForm() {
       );
 
       if (alreadyBooked) {
-        alert("This time slot is already booked!");
+        alert("This time slot is already booked.!");
         return;
       }
 
@@ -231,7 +231,14 @@ function submitForm() {
     })
     .then(response => {
       if (response) {
-        alert("Appointment Booked!");
+      alert(
+      `✅ Appointment Confirmed!\n\n` +
+      `Name: ${name}\n` +
+      `Service: ${service}\n` +
+      `Time: ${time}\n\n` +
+      `We look forward to seeing you!`
+    );
+
 
         // ✅ CLEAR FIELDS HERE
         document.getElementById("name").value = "";
