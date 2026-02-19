@@ -118,6 +118,8 @@ th {
 
 <button onclick="submitForm()">Book</button>
 
+<div id="loading" style="text-align:center; margin-bottom:10px;">Loading appointments...</div>
+
 <h2>All Appointments</h2>
 <table>
 <thead>
@@ -132,7 +134,11 @@ th {
 <tbody id="tableBody">
 </tbody>
 </table>
-
+<div style="text-align:center; margin-top:10px; display:none;" id="pagination">
+  <button id="prevBtn" onclick="prevPage()">Previous</button>
+  <span id="pageInfo"></span>
+  <button id="nextBtn" onclick="nextPage()">Next</button>
+</div>
 </div>
 
 <script>
@@ -143,18 +149,29 @@ let currentPage = 1;
 const rowsPerPage = 5; // change this as needed
 
 function loadData() {
+  const loading = document.getElementById("loading");
+  const tableContainer = document.getElementById("tableContainer");
+  const pagination = document.getElementById("pagination");
+
+  loading.style.display = "block";       // show loading
+  tableContainer.style.display = "none"; // hide table
+  pagination.style.display = "none";     // hide pagination
+
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
-       allData = data;
-      currentPage = 1;
-       displayTable();
+      allData = data;           // store all appointments
+      currentPage = 1;          // reset to first page
+      displayTable();           // display first page
+      tableContainer.style.display = "block"; // show table
+      pagination.style.display = "block";    // show pagination
     })
-    .catch(error => console.error("Load Error:", error));
+    .catch(err => console.error("Load Error:", err))
+    .finally(() => loading.style.display = "none"); // hide loading
 }
 
-function displayTable() 
-{
+// Display table for current page
+function displayTable() {
   const start = (currentPage - 1) * rowsPerPage;
   const end = start + rowsPerPage;
   const pageData = allData.slice(start, end);
@@ -168,8 +185,7 @@ function displayTable()
       <td>
         <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
           <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
-               alt="WhatsApp" 
-               style="width:24px; height:24px;">
+               alt="WhatsApp" style="width:24px; height:24px;">
         </a>
       </td>
     </tr>`;
@@ -179,9 +195,12 @@ function displayTable()
   updatePageInfo();
 }
 
+// Update pagination info
 function updatePageInfo() {
+  const pageInfo = document.getElementById("pageInfo");
   const totalPages = Math.ceil(allData.length / rowsPerPage);
-  document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
   document.getElementById("prevBtn").disabled = currentPage === 1;
   document.getElementById("nextBtn").disabled = currentPage === totalPages;
 }
@@ -201,8 +220,8 @@ function nextPage() {
   }
 }
 
-
-
+// Call loadData after DOM is ready
+document.addEventListener("DOMContentLoaded", loadData);
 
 
 
