@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Booking</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: url('salon.jpg') no-repeat center center fixed;
+            background-size: cover;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #a5665d;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+            button:hover {
+                background: #a5665d;
+            }
+
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #a5665d;
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            input, select, button {
+                font-size: 0.95rem;
+                padding: 10px;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Pagination buttons should be auto width, not full width */
+        #pagination button {
+            width: auto; /* remove full width */
+            padding: 6px 12px;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #a5665d;
+            background-color: #a5665d;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+            #pagination button:hover:not(:disabled) {
+                background-color: #a5665d;
+            }
+
+            #pagination button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        /* Page info in middle */
+        #pageInfo {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+
+      
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5); /* semi-transparent */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* above everything */
+        }
+
+        /* Spinner container */
+        .spinner-container {
+            text-align: center;
+            color: #fff;
+        }
+
+        /* Spinner animation */
+        .spinner {
+            border: 8px solid rgba(213 59 59 / 30%); /* Light border */
+            border-top: 8px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+       
+
+        <div id="overlay">
+            <div class="spinner-container" id="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading...</div>
+            </div>
+        </div>
+
+
+        <h2>Book Appointment</h2>
+
+        <input type="text" id="name" placeholder="Name">
+        <select id="service">
+            <option value="">Select Service</option>
+         
+            <option value="Dental">Dental</option>
+            <option value="General">General</option>
+ 	    <option value="ENT">ENT</option>
+       	   <option value="Other">Other</option>
+
+
+            
+
+        </select>
+        <select id="time">
+            <option value="">--Select Time--</option>
+
+        </select>
+
+        <button onclick="submitForm()">Book</button>
+
+
+        <h2 style="margin-top: 10px;"> All Appointments</h2>
+        <table id="tableContainer" class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Service</th>
+                    <th>Time</th>
+                    <th>Chat</th>
+
+                </tr>
+            </thead>
+            <tbody id="tableBody" class="table">
+            </tbody>
+        </table>
+        <div id="pagination" style="display:none; margin-top: 10px; text-align:center;">
+            <button id="prevBtn" onclick="prevPage()">Previous</button>
+            <span id="pageInfo" style="margin: 0 10px;"></span>
+            <button id="nextBtn" onclick="nextPage()">Next</button>
+        </div>
+    </div>
+
+    <script>
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
+        let allData = [];
+        let currentPage = 1;
+        const rowsPerPage = 3; // change this as needed
+
+        function loadData() {
+            const overlay = document.getElementById("overlay");
+            //document.getElementById("overlay").style.display = "flex";
+            const tableContainer = document.getElementById("tableContainer");
+            const pagination = document.getElementById("pagination");
+
+            overlay.style.display = "flex";       // show loading
+            tableContainer.style.display = "inline-grid-lanes"; // hide table
+            pagination.style.display = "none";     // hide pagination
+
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    allData = data;           // store all appointments
+                    currentPage = 1;          // reset to first page
+                    displayTable();           // display first page
+                    tableContainer.style.display = "inline-grid-lanes"; // show table
+                    pagination.style.display = "block";    // show pagination
+                })
+                .catch(err => console.error("Load Error:", err))
+                .finally(() => overlay.style.display = "none"); // hide loading
+        }
+
+        // Display table for current page
+        function displayTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = allData.slice(start, end);
+
+            let bookedTimes = allData.map(item => item.Time); // get all booked times
+
+
+            let table = "";
+            pageData.forEach(item => {
+                table += `<tr>
+          <td>${item.Name}</td>
+          <td>${item.Service}</td>
+          <td>${item.Time}</td>
+          <td>
+            <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                   alt="WhatsApp" style="width:24px; height:24px;">
+            </a>
+          </td>
+        </tr>`;
+            });
+
+            document.getElementById("tableBody").innerHTML = table;
+            const select = document.getElementById("time");
+            const startTime = 9; // 09:00
+            const endTime = 20;  // 20:00
+
+            for (let h = startTime; h <= endTime; h++)
+            {
+                for (let m = 0; m < 60; m += 15) {
+                    if (h === end && m > 0) continue; // stop at 20:00 exactly
+                    let hour = h.toString().padStart(2, '0');
+                    let min = m.toString().padStart(2, '0');
+                    let time = `${hour}:${min}`;
+
+                    let option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = time;
+
+                    // Disable if already booked
+                    if (bookedTimes.includes(time)) {
+                        option.disabled = true;
+                        option.textContent += " (Booked)";
+                    }
+
+                    select.appendChild(option);
+                }
+            }
+
+
+
+            updatePageInfo();
+        }
+
+        // Update pagination info
+        function updatePageInfo() {
+            const pageInfo = document.getElementById("pageInfo");
+            const totalPages = Math.ceil(allData.length / rowsPerPage);
+
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById("prevBtn").disabled = currentPage === 1;
+            document.getElementById("nextBtn").disabled = currentPage === totalPages;
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(allData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayTable();
+            }
+        }
+
+        // Call loadData after DOM is ready
+        document.addEventListener("DOMContentLoaded", loadData);
+
+
+
+        function submitForm() {
+            let name = document.getElementById("name").value.trim();
+            let service = document.getElementById("service").value.trim();
+            let time = document.getElementById("time").value.trim();
+
+
+            if (!name || !service || !time) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+
+                    let alreadyBooked = data.some(item =>
+                        String(item.Time).trim() === time
+                    );
+
+                    if (alreadyBooked) {
+                        alert("This time slot is already booked.!");
+                        return;
+                    }
+
+                    return fetch(API_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            Name: name,
+                            Service: service,
+                            Time: time
+                        })
+                    });
+
+
+                })
+                .then(response => {
+                    if (response) {
+                        alert(
+                            `✅ Appointment Confirmed!\n\n` +
+                            `Name: ${name}\n` +
+                            `Service: ${service}\n` +
+                            `Time: ${time}\n\n` +
+                            `We look forward to seeing you!`
+                        );
+
+
+                        // ✅ CLEAR FIELDS HERE
+                        document.getElementById("name").value = "";
+                        document.getElementById("service").value = "";
+                        document.getElementById("time").value = "";
+
+                        loadData();
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+
+        // Auto load when page opens
+        loadData();
+
+    </script>
+
+
+</body>
+</html>
