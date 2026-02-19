@@ -128,7 +128,7 @@
         }
 
 
-      
+
         #overlay {
             position: fixed;
             top: 0;
@@ -173,14 +173,16 @@
             font-size: 1.2em;
             font-weight: bold;
         }
-
     </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
     <div class="container">
 
-       
+
 
         <div id="overlay">
             <div class="spinner-container" id="loading">
@@ -195,7 +197,7 @@
         <input type="text" id="name" placeholder="Name">
         <select id="service">
             <option value="">Select Service</option>
-         
+
             <option value="Smoothing">Smoothing</option>
             <option value="Botox">Botox</option>
             <option value="Keratin">Keratin</option>
@@ -231,12 +233,30 @@
             </thead>
             <tbody id="tableBody" class="table">
             </tbody>
+
         </table>
+
+        <p style="font-size:14px; color:#555; margin:10px 0;">
+            Total Records: <strong id="totlaApponintment">0</strong>
+        </p>
+
+        <!--<a href="https://wa.me/919717966818?text=Hi%20Sir%2CMadam.%0AWe%E2%80%99ve%20developed%20an%20easy-to-use%20Salon%20Management%20Software%20to%20automate%20appointments%2C%20save%20time%2C%20and%20boost%20monthly%20income.%20Let%20me%20know%20if%20you%E2%80%99d%20like%20a%20quick%20demo." target="_blank">
+        WhatsApp
+    </a>-->
+
+
+
         <div id="pagination" style="display:none; margin-top: 10px; text-align:center;">
             <button id="prevBtn" onclick="prevPage()">Previous</button>
             <span id="pageInfo" style="margin: 0 10px;"></span>
             <button id="nextBtn" onclick="nextPage()">Next</button>
         </div>
+
+
+        <canvas id="sheetChart" height="100"></canvas>
+
+
+
     </div>
 
     <script>
@@ -245,25 +265,72 @@
         let allData = [];
         let currentPage = 1;
         const rowsPerPage = 3; // change this as needed
-
+        let totalCount = 0;
         function loadData() {
             const overlay = document.getElementById("overlay");
             //document.getElementById("overlay").style.display = "flex";
             const tableContainer = document.getElementById("tableContainer");
             const pagination = document.getElementById("pagination");
-
+          
             overlay.style.display = "flex";       // show loading
             tableContainer.style.display = "inline-grid-lanes"; // hide table
             pagination.style.display = "none";     // hide pagination
-
+          
+         
             fetch(API_URL)
                 .then(res => res.json())
                 .then(data => {
                     allData = data;           // store all appointments
+                   totalCount= data.length;
                     currentPage = 1;          // reset to first page
                     displayTable();           // display first page
                     tableContainer.style.display = "inline-grid-lanes"; // show table
                     pagination.style.display = "block";    // show pagination
+                    document.getElementById("totlaApponintment").innerText = totalCount;
+
+
+                    const serviceCount = {};
+
+                    data.forEach(row => {
+                        const service = row.Service;
+
+                        if (!serviceCount[service]) {
+                            serviceCount[service] = 0;
+                        }
+
+                        serviceCount[service]++;
+                    });
+                    const labels = Object.keys(serviceCount);
+                    const values = Object.values(serviceCount);
+
+                    const ctx = document.getElementById('sheetChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar', // change to 'pie' if you want
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Total Bookings',
+                                data: values,
+                                backgroundColor: [
+                                    '#667eea',
+                                    '#f6ad55',
+                                    '#48bb78',
+                                    '#ed64a6',
+                                    '#38b2ac',
+                                    '#9f7aea'
+                                ],
+                                borderRadius: 6,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+
                 })
                 .catch(err => console.error("Load Error:", err))
                 .finally(() => overlay.style.display = "none"); // hide loading
@@ -414,7 +481,7 @@
 
 
         // Auto load when page opens
-        loadData();
+        //loadData();
 
     </script>
 
