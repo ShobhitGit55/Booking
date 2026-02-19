@@ -14,7 +14,8 @@
 
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: url('salon.jpg') no-repeat center center fixed;
+            background-size: cover;
             padding: 20px;
         }
 
@@ -45,7 +46,7 @@
         button {
             width: 100%;
             padding: 12px;
-            background: #667eea;
+            background: #a5665d;
             color: white;
             border: none;
             cursor: pointer;
@@ -55,7 +56,7 @@
         }
 
             button:hover {
-                background: #5a67d8;
+                background: #a5665d;
             }
 
         .table-wrapper {
@@ -78,7 +79,7 @@
         }
 
         th {
-            background: #667eea;
+            background: #a5665d;
             color: white;
         }
 
@@ -105,14 +106,14 @@
             font-size: 0.9rem;
             border-radius: 6px;
             cursor: pointer;
-            border: 1px solid #667eea;
-            background-color: #667eea;
+            border: 1px solid #a5665d;
+            background-color: #a5665d;
             color: white;
             transition: background 0.3s ease;
         }
 
             #pagination button:hover:not(:disabled) {
-                background-color: #5a67d8;
+                background-color: #a5665d;
             }
 
             #pagination button:disabled {
@@ -194,11 +195,19 @@
         <input type="text" id="name" placeholder="Name">
         <select id="service">
             <option value="">Select Service</option>
-            <option>Haircut</option>
-            <option>Massage</option>
-            <option>Gym</option>
-            <option>Consultation</option>
-            <option>Other</option>
+         
+            <option value="Smoothing">Smoothing</option>
+            <option value="Botox">Botox</option>
+            <option value="Keratin">Keratin</option>
+            <option value="Highlights">Highlights</option>
+            <option value="Global Color(Base Shade)">Global Color(Base Shade)</option>
+            <option value="Rica Wax(FA+FL+UA)">Rica Wax(FA+FL+UA)</option>
+            <option value="Hair Spa">Hair Spa</option>
+            <option value="Facial O3+">Facial O3+</option>
+            <option value="Clean Up">Clean Up</option>
+            <option value="Female Haircut">Female Haircut</option>
+            <option value="Full body Wax">Full body Wax</option>
+            <option value="Other">Other</option>
 
         </select>
         <select id="time">
@@ -239,10 +248,11 @@
 
         function loadData() {
             const overlay = document.getElementById("overlay");
+            //document.getElementById("overlay").style.display = "flex";
             const tableContainer = document.getElementById("tableContainer");
             const pagination = document.getElementById("pagination");
 
-            overlay.style.display = "block";       // show loading
+            overlay.style.display = "flex";       // show loading
             tableContainer.style.display = "inline-grid-lanes"; // hide table
             pagination.style.display = "none";     // hide pagination
 
