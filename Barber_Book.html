@@ -173,21 +173,40 @@
             font-size: 1.2em;
             font-weight: bold;
         }
+
+        .chart-panel {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 20px auto;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .panel-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        canvas {
+            width: 100% !important;
+        }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </head>
 
 <body>
     <div class="container">
 
-
-
         <div id="overlay">
             <div class="spinner-container" id="loading">
                 <div class="spinner"></div>
-                <div class="loading-text">Loading...</div>
+                <div class="loading-text">Please wait...</div>
             </div>
         </div>
 
@@ -213,47 +232,11 @@
 
         </select>
         <select id="time">
-            <option value="">--Select Time--</option>
+            <option value="">Select Time</option>
 
         </select>
 
         <button onclick="submitForm()">Book</button>
-
-
-        <h2 style="margin-top: 10px;"> All Appointments</h2>
-        <table id="tableContainer" class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Service</th>
-                    <th>Time</th>
-                    <th>Chat</th>
-
-                </tr>
-            </thead>
-            <tbody id="tableBody" class="table">
-            </tbody>
-
-        </table>
-
-        <p style="font-size:14px; color:#555; margin:10px 0;">
-            Total Records: <strong id="totlaApponintment">0</strong>
-        </p>
-
-        <!--<a href="https://wa.me/919717966818?text=Hi%20Sir%2CMadam.%0AWe%E2%80%99ve%20developed%20an%20easy-to-use%20Salon%20Management%20Software%20to%20automate%20appointments%2C%20save%20time%2C%20and%20boost%20monthly%20income.%20Let%20me%20know%20if%20you%E2%80%99d%20like%20a%20quick%20demo." target="_blank">
-        WhatsApp
-    </a>-->
-
-
-
-        <div id="pagination" style="display:none; margin-top: 10px; text-align:center;">
-            <button id="prevBtn" onclick="prevPage()">Previous</button>
-            <span id="pageInfo" style="margin: 0 10px;"></span>
-            <button id="nextBtn" onclick="nextPage()">Next</button>
-        </div>
-
-
-        <canvas id="sheetChart" height="100"></canvas>
 
 
 
@@ -268,15 +251,9 @@
         let totalCount = 0;
         function loadData() {
             const overlay = document.getElementById("overlay");
-            //document.getElementById("overlay").style.display = "flex";
-            const tableContainer = document.getElementById("tableContainer");
-            const pagination = document.getElementById("pagination");
+           
+                      overlay.style.display = "flex";       // show loading
           
-            overlay.style.display = "flex";       // show loading
-            tableContainer.style.display = "inline-grid-lanes"; // hide table
-            pagination.style.display = "none";     // hide pagination
-          
-         
             fetch(API_URL)
                 .then(res => res.json())
                 .then(data => {
@@ -284,53 +261,7 @@
                    totalCount= data.length;
                     currentPage = 1;          // reset to first page
                     displayTable();           // display first page
-                    tableContainer.style.display = "inline-grid-lanes"; // show table
-                    pagination.style.display = "block";    // show pagination
-                    document.getElementById("totlaApponintment").innerText = totalCount;
-
-
-                    const serviceCount = {};
-
-                    data.forEach(row => {
-                        const service = row.Service;
-
-                        if (!serviceCount[service]) {
-                            serviceCount[service] = 0;
-                        }
-
-                        serviceCount[service]++;
-                    });
-                    const labels = Object.keys(serviceCount);
-                    const values = Object.values(serviceCount);
-
-                    const ctx = document.getElementById('sheetChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'bar', // change to 'pie' if you want
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Total Bookings',
-                                data: values,
-                                backgroundColor: [
-                                    '#667eea',
-                                    '#f6ad55',
-                                    '#48bb78',
-                                    '#ed64a6',
-                                    '#38b2ac',
-                                    '#9f7aea'
-                                ],
-                                borderRadius: 6,
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: { display: false }
-                            }
-                        }
-                    });
-
+                    
                 })
                 .catch(err => console.error("Load Error:", err))
                 .finally(() => overlay.style.display = "none"); // hide loading
@@ -343,24 +274,6 @@
             const pageData = allData.slice(start, end);
 
             let bookedTimes = allData.map(item => item.Time); // get all booked times
-
-
-            let table = "";
-            pageData.forEach(item => {
-                table += `<tr>
-          <td>${item.Name}</td>
-          <td>${item.Service}</td>
-          <td>${item.Time}</td>
-          <td>
-            <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-                   alt="WhatsApp" style="width:24px; height:24px;">
-            </a>
-          </td>
-        </tr>`;
-            });
-
-            document.getElementById("tableBody").innerHTML = table;
             const select = document.getElementById("time");
             const startTime = 9; // 09:00
             const endTime = 20;  // 20:00
@@ -387,49 +300,28 @@
                 }
             }
 
-
-
-            updatePageInfo();
         }
-
-        // Update pagination info
-        function updatePageInfo() {
-            const pageInfo = document.getElementById("pageInfo");
-            const totalPages = Math.ceil(allData.length / rowsPerPage);
-
-            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-            document.getElementById("prevBtn").disabled = currentPage === 1;
-            document.getElementById("nextBtn").disabled = currentPage === totalPages;
-        }
-
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                displayTable();
-            }
-        }
-
-        function nextPage() {
-            const totalPages = Math.ceil(allData.length / rowsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                displayTable();
-            }
-        }
+              
 
         // Call loadData after DOM is ready
         document.addEventListener("DOMContentLoaded", loadData);
+        function submitForm()
+        {
 
+            overlay.style.display = "flex";   // show loading
 
-
-        function submitForm() {
             let name = document.getElementById("name").value.trim();
             let service = document.getElementById("service").value.trim();
             let time = document.getElementById("time").value.trim();
 
-
-            if (!name || !service || !time) {
-                alert("Please fill all fields");
+            if (!service || !time) {
+                overlay.style.display = "none";
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Information',
+                    text: 'Please fill service and time fields',
+                    confirmButtonColor: '#f6ad55'
+                });
                 return;
             }
 
@@ -437,15 +329,7 @@
                 .then(res => res.json())
                 .then(data => {
 
-                    let alreadyBooked = data.some(item =>
-                        String(item.Time).trim() === time
-                    );
-
-                    if (alreadyBooked) {
-                        alert("This time slot is already booked.!");
-                        return;
-                    }
-
+                    
                     return fetch(API_URL, {
                         method: "POST",
                         body: JSON.stringify({
@@ -454,34 +338,41 @@
                             Time: time
                         })
                     });
-
-
                 })
                 .then(response => {
-                    if (response) {
-                        alert(
-                            `✅ Appointment Confirmed!\n\n` +
-                            `Name: ${name}\n` +
-                            `Service: ${service}\n` +
-                            `Time: ${time}\n\n` +
-                            `We look forward to seeing you!`
-                        );
 
+                    if (!response) return;
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Appointment Confirmed!',
+                        html: `
+                             <strong>Name:</strong> ${name}<br>
+                             <strong>Service:</strong> ${service}<br>
+                             <strong>Time:</strong> ${time}
+    `,
+                        background: '#f0fff4',   // light green background
+                        color: '#1a202c',
+                        confirmButtonColor: '#38a169',
+                        iconColor: '#38a169'
+                    }).then(() => {
+                        window.close();
+                    });
 
-                        // ✅ CLEAR FIELDS HERE
-                        document.getElementById("name").value = "";
-                        document.getElementById("service").value = "";
-                        document.getElementById("time").value = "";
-
-                        loadData();
-                    }
                 })
-                .catch(error => console.error("Error:", error));
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!',
+                        confirmButtonColor: '#e53e3e'
+                    });
+
+                })
+                .finally(() => {
+                    overlay.style.display = "none";   // always hide loader
+                });
         }
 
-
-        // Auto load when page opens
-        //loadData();
 
     </script>
 
