@@ -1,292 +1,325 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Appointment Booking</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Booking</title>
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 20px;
-}
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px;
+        }
 
-.container {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: auto;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 15px;
-    font-size: 1.6rem;
-}
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+        }
 
-input, select {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 12px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
 
-button {
-    width: 100%;
-    padding: 12px;
-    background: #667eea;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-    font-size: 1rem;
-    transition: background 0.3s ease;
-}
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
 
-button:hover {
-    background: #5a67d8;
-}
+            button:hover {
+                background: #5a67d8;
+            }
 
-.table-wrapper {
-    overflow-x: auto;
-    width: 100%;
-}
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
 
-table {
-    width: 100%;
-    margin-top: 20px;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-}
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-    white-space: nowrap;
-}
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            white-space: nowrap;
+        }
 
-th {
-    background: #667eea;
-    color: white;
-}
+        th {
+            background: #667eea;
+            color: white;
+        }
 
-@media (max-width: 480px) {
-    h2 {
-        font-size: 1.3rem;
-    }
-    input, select, button {
-        font-size: 0.95rem;
-        padding: 10px;
-    }
-    table {
-        font-size: 0.85rem;
-    }
-}
-</style>
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            input, select, button {
+                font-size: 0.95rem;
+                padding: 10px;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Pagination buttons should be auto width, not full width */
+        #pagination button {
+            width: auto; /* remove full width */
+            padding: 6px 12px;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #667eea;
+            background-color: #667eea;
+            color: white;
+            transition: background 0.3s ease;
+        }
+
+            #pagination button:hover:not(:disabled) {
+                background-color: #5a67d8;
+            }
+
+            #pagination button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+
+        /* Page info in middle */
+        #pageInfo {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+
+    </style>
 </head>
 
 <body>
-<div class="container">
-<h2>Book Appointment</h2>
+    <div class="container">
+        <h2>Book Appointment</h2>
 
-<input type="text" id="name" placeholder="Name">
-<select id="service">
-<option value="">Select Service</option>
-<option>Haircut</option>
-<option>Massage</option>
-<option>Gym</option>
-<option>Consultation</option>
-<option>Other</option>
+        <input type="text" id="name" placeholder="Name">
+        <select id="service">
+            <option value="">Select Service</option>
+            <option>Haircut</option>
+            <option>Massage</option>
+            <option>Gym</option>
+            <option>Consultation</option>
+            <option>Other</option>
 
-</select>
-<select id="time">
-  <option value="">--Select Time--</option>
- 
-</select>
+        </select>
+        <select id="time">
+            <option value="">--Select Time--</option>
 
-<button onclick="submitForm()">Book</button>
+        </select>
 
-<div id="loading" style="text-align:center; margin-bottom:10px;">Loading appointments...</div>
+        <button onclick="submitForm()">Book</button>
 
-<h2>All Appointments</h2>
-<table id="tableContainer"> 
-<thead>
-<tr>
-<th>Name</th>
-<th>Service</th>
-<th>Time</th>
-<th>Chat</th>
+        <div id="loading" style="text-align:center; margin-bottom:10px;">Loading appointments...</div>
 
-</tr>
-</thead>
-<tbody id="tableBody">
-</tbody>
-</table>
-<div style="text-align:center; margin-top:10px; display:none;" id="pagination">
-  <button id="prevBtn" onclick="prevPage()">Previous</button>
-  <span id="pageInfo"></span>
-  <button id="nextBtn" onclick="nextPage()">Next</button>
-</div>
-</div>
+        <h2>All Appointments</h2>
+        <table id="tableContainer">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Service</th>
+                    <th>Time</th>
+                    <th>Chat</th>
 
-<script>
+                </tr>
+            </thead>
+            <tbody id="tableBody" class="table">
+            </tbody>
+        </table>
+        <div id="pagination" style="display:none; margin-top: 10px; text-align:center;">
+            <button id="prevBtn" onclick="prevPage()">Previous</button>
+            <span id="pageInfo" style="margin: 0 10px;"></span>
+            <button id="nextBtn" onclick="nextPage()">Next</button>
+        </div>
+    </div>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
-let allData = [];
-let currentPage = 1;
-const rowsPerPage = 5; // change this as needed
+    <script>
 
-function loadData() {
-  const loading = document.getElementById("loading");
-  const tableContainer = document.getElementById("tableContainer");
-  const pagination = document.getElementById("pagination");
+        const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
+        let allData = [];
+        let currentPage = 1;
+        const rowsPerPage = 5; // change this as needed
 
-  loading.style.display = "block";       // show loading
-  tableContainer.style.display = "none"; // hide table
-  pagination.style.display = "none";     // hide pagination
+        function loadData() {
+            const loading = document.getElementById("loading");
+            const tableContainer = document.getElementById("tableContainer");
+            const pagination = document.getElementById("pagination");
 
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-      allData = data;           // store all appointments
-      currentPage = 1;          // reset to first page
-      displayTable();           // display first page
-      tableContainer.style.display = "block"; // show table
-      pagination.style.display = "block";    // show pagination
-    })
-    .catch(err => console.error("Load Error:", err))
-    .finally(() => loading.style.display = "none"); // hide loading
-}
+            loading.style.display = "block";       // show loading
+            tableContainer.style.display = "none"; // hide table
+            pagination.style.display = "none";     // hide pagination
 
-// Display table for current page
-function displayTable() {
-  const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
-  const pageData = allData.slice(start, end);
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+                    allData = data;           // store all appointments
+                    currentPage = 1;          // reset to first page
+                    displayTable();           // display first page
+                    tableContainer.style.display = "block"; // show table
+                    pagination.style.display = "block";    // show pagination
+                })
+                .catch(err => console.error("Load Error:", err))
+                .finally(() => loading.style.display = "none"); // hide loading
+        }
 
-  let table = "";
-  pageData.forEach(item => {
-    table += `<tr>
-      <td>${item.Name}</td>
-      <td>${item.Service}</td>
-      <td>${item.Time}</td>
-      <td>
-        <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
-               alt="WhatsApp" style="width:24px; height:24px;">
-        </a>
-      </td>
-    </tr>`;
-  });
+        // Display table for current page
+        function displayTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = allData.slice(start, end);
 
-  document.getElementById("tableBody").innerHTML = table;
-  updatePageInfo();
-}
+            let table = "";
+            pageData.forEach(item => {
+                table += `<tr>
+          <td>${item.Name}</td>
+          <td>${item.Service}</td>
+          <td>${item.Time}</td>
+          <td>
+            <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                   alt="WhatsApp" style="width:24px; height:24px;">
+            </a>
+          </td>
+        </tr>`;
+            });
 
-// Update pagination info
-function updatePageInfo() {
-  const pageInfo = document.getElementById("pageInfo");
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
+            document.getElementById("tableBody").innerHTML = table;
+            updatePageInfo();
+        }
 
-  pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
-  document.getElementById("prevBtn").disabled = currentPage === 1;
-  document.getElementById("nextBtn").disabled = currentPage === totalPages;
-}
+        // Update pagination info
+        function updatePageInfo() {
+            const pageInfo = document.getElementById("pageInfo");
+            const totalPages = Math.ceil(allData.length / rowsPerPage);
 
-function prevPage() {
-  if(currentPage > 1) {
-    currentPage--;
-    displayTable();
-  }
-}
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById("prevBtn").disabled = currentPage === 1;
+            document.getElementById("nextBtn").disabled = currentPage === totalPages;
+        }
 
-function nextPage() {
-  const totalPages = Math.ceil(allData.length / rowsPerPage);
-  if(currentPage < totalPages) {
-    currentPage++;
-    displayTable();
-  }
-}
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayTable();
+            }
+        }
 
-// Call loadData after DOM is ready
-document.addEventListener("DOMContentLoaded", loadData);
+        function nextPage() {
+            const totalPages = Math.ceil(allData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayTable();
+            }
+        }
 
-
-
-function submitForm() {
-  let name = document.getElementById("name").value.trim();
-  let service = document.getElementById("service").value.trim();
-  let time = document.getElementById("time").value.trim();
+        // Call loadData after DOM is ready
+        document.addEventListener("DOMContentLoaded", loadData);
 
 
-  if (!name || !service || !time) {
-    alert("Please fill all fields");
-    return;
-  }
 
-  fetch(API_URL)
-    .then(res => res.json())
-    .then(data => {
-
-      let alreadyBooked = data.some(item => 
-        String(item.Time).trim() === time
-      );
-
-      if (alreadyBooked) {
-        alert("This time slot is already booked.!");
-        return;
-      }
-
-     return fetch(API_URL, {
-  method: "POST",
-  body: JSON.stringify({
-    Name: name,
-    Service: service,
-    Time: time
-     })
-});
+        function submitForm() {
+            let name = document.getElementById("name").value.trim();
+            let service = document.getElementById("service").value.trim();
+            let time = document.getElementById("time").value.trim();
 
 
-    })
-    .then(response => {
-      if (response) {
-      alert(
-      `✅ Appointment Confirmed!\n\n` +
-      `Name: ${name}\n` +
-      `Service: ${service}\n` +
-      `Time: ${time}\n\n` +
-      `We look forward to seeing you!`
-    );
+            if (!name || !service || !time) {
+                alert("Please fill all fields");
+                return;
+            }
+
+            fetch(API_URL)
+                .then(res => res.json())
+                .then(data => {
+
+                    let alreadyBooked = data.some(item =>
+                        String(item.Time).trim() === time
+                    );
+
+                    if (alreadyBooked) {
+                        alert("This time slot is already booked.!");
+                        return;
+                    }
+
+                    return fetch(API_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            Name: name,
+                            Service: service,
+                            Time: time
+                        })
+                    });
 
 
-        // ✅ CLEAR FIELDS HERE
-        document.getElementById("name").value = "";
-        document.getElementById("service").value = "";
-        document.getElementById("time").value = "";
+                })
+                .then(response => {
+                    if (response) {
+                        alert(
+                            `✅ Appointment Confirmed!\n\n` +
+                            `Name: ${name}\n` +
+                            `Service: ${service}\n` +
+                            `Time: ${time}\n\n` +
+                            `We look forward to seeing you!`
+                        );
 
+
+                        // ✅ CLEAR FIELDS HERE
+                        document.getElementById("name").value = "";
+                        document.getElementById("service").value = "";
+                        document.getElementById("time").value = "";
+
+                        loadData();
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+
+        // Auto load when page opens
         loadData();
-      }
-    })
-    .catch(error => console.error("Error:", error));
-}
 
-
-// Auto load when page opens
-loadData();
-
-</script>
+    </script>
 
 
 </body>
