@@ -127,11 +127,68 @@
         }
 
 
+      
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5); /* semi-transparent */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* above everything */
+        }
+
+        /* Spinner container */
+        .spinner-container {
+            text-align: center;
+            color: #fff;
+        }
+
+        /* Spinner animation */
+        .spinner {
+            border: 8px solid rgba(213 59 59 / 30%); /* Light border */
+            border-top: 8px solid #fff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 
 <body>
     <div class="container">
+
+       
+
+        <div id="overlay">
+            <div class="spinner-container" id="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Loading...</div>
+            </div>
+        </div>
+
+
         <h2>Book Appointment</h2>
 
         <input type="text" id="name" placeholder="Name">
@@ -151,10 +208,9 @@
 
         <button onclick="submitForm()">Book</button>
 
-        <div id="loading" style="text-align:center; margin-bottom:10px;">Loading appointments...</div>
 
-        <h2>All Appointments</h2>
-        <table id="tableContainer">
+        <h2 style="margin-top: 10px;"> All Appointments</h2>
+        <table id="tableContainer" class="table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -179,15 +235,15 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
         let allData = [];
         let currentPage = 1;
-        const rowsPerPage = 5; // change this as needed
+        const rowsPerPage = 3; // change this as needed
 
         function loadData() {
-            const loading = document.getElementById("loading");
+            const overlay = document.getElementById("overlay");
             const tableContainer = document.getElementById("tableContainer");
             const pagination = document.getElementById("pagination");
 
-            loading.style.display = "block";       // show loading
-            tableContainer.style.display = "none"; // hide table
+            overlay.style.display = "block";       // show loading
+            tableContainer.style.display = "inline-grid-lanes"; // hide table
             pagination.style.display = "none";     // hide pagination
 
             fetch(API_URL)
@@ -196,11 +252,11 @@
                     allData = data;           // store all appointments
                     currentPage = 1;          // reset to first page
                     displayTable();           // display first page
-                    tableContainer.style.display = "block"; // show table
+                    tableContainer.style.display = "inline-grid-lanes"; // show table
                     pagination.style.display = "block";    // show pagination
                 })
                 .catch(err => console.error("Load Error:", err))
-                .finally(() => loading.style.display = "none"); // hide loading
+                .finally(() => overlay.style.display = "none"); // hide loading
         }
 
         // Display table for current page
@@ -208,6 +264,9 @@
             const start = (currentPage - 1) * rowsPerPage;
             const end = start + rowsPerPage;
             const pageData = allData.slice(start, end);
+
+            let bookedTimes = allData.map(item => item.Time); // get all booked times
+
 
             let table = "";
             pageData.forEach(item => {
@@ -225,6 +284,34 @@
             });
 
             document.getElementById("tableBody").innerHTML = table;
+            const select = document.getElementById("time");
+            const startTime = 9; // 09:00
+            const endTime = 20;  // 20:00
+
+            for (let h = startTime; h <= endTime; h++)
+            {
+                for (let m = 0; m < 60; m += 15) {
+                    if (h === end && m > 0) continue; // stop at 20:00 exactly
+                    let hour = h.toString().padStart(2, '0');
+                    let min = m.toString().padStart(2, '0');
+                    let time = `${hour}:${min}`;
+
+                    let option = document.createElement('option');
+                    option.value = time;
+                    option.textContent = time;
+
+                    // Disable if already booked
+                    if (bookedTimes.includes(time)) {
+                        option.disabled = true;
+                        option.textContent += " (Booked)";
+                    }
+
+                    select.appendChild(option);
+                }
+            }
+
+
+
             updatePageInfo();
         }
 
