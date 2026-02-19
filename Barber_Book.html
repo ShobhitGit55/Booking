@@ -83,6 +83,8 @@ th {
 <th>Name</th>
 <th>Service</th>
 <th>Time</th>
+<th>Chat</th>
+
 </tr>
 </thead>
 <tbody id="tableBody">
@@ -106,7 +108,15 @@ function loadData() {
           <td>${String(item.Name)}</td>
           <td>${String(item.Service)}</td>
           <td>${String(item.Time)}</td>
-        </tr>`;
+<td>
+      <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20" target="_blank" style="text-decoration:none;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
+             alt="WhatsApp" 
+             style="width:24px; height:24px;">
+      </a>
+    </td>      
+
+  </tr>`;
       });
 
       document.getElementById("tableBody").innerHTML = table;
