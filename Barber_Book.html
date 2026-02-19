@@ -138,61 +138,73 @@ th {
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbzISBW0lUV5Q18HbX59F7EiUKojjwSP29MzZT3vdOxnLgdl61E0wj2mTYRNQpZdIv1U/exec";
+let allData = [];
+let currentPage = 1;
+const rowsPerPage = 5; // change this as needed
 
 function loadData() {
   fetch(API_URL)
     .then(res => res.json())
     .then(data => {
-      let table = "";
-      let bookedTimes = data.map(item => item.Time); // get all booked times
-
-      // Populate table
-      data.forEach(item => {
-        table += `<tr>
-          <td>${String(item.Name)}</td>
-          <td>${String(item.Service)}</td>
-          <td>${String(item.Time)}</td>
-          <td>
-            <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
-                   alt="WhatsApp" 
-                   style="width:24px; height:24px;">
-            </a>
-          </td>
-        </tr>`;
-      });
-
-      document.getElementById("tableBody").innerHTML = table;
-
-      // Populate time select with 15-minute intervals
-      const select = document.getElementById("time");
-      const start = 9; // 09:00
-      const end = 20;  // 20:00
-
-      for(let h=start; h<=end; h++){
-        for(let m=0; m<60; m+=15){
-          if(h===end && m>0) continue; // stop at 20:00 exactly
-          let hour = h.toString().padStart(2,'0');
-          let min = m.toString().padStart(2,'0');
-          let time = `${hour}:${min}`;
-
-          let option = document.createElement('option');
-          option.value = time;
-          option.textContent = time;
-
-          // Disable if already booked
-          if(bookedTimes.includes(time)){
-            option.disabled = true;
-            option.textContent += " (Booked)";
-          }
-
-          select.appendChild(option);
-        }
-      }
-
+       allData = data;
+      currentPage = 1;
+       displayTable();
     })
     .catch(error => console.error("Load Error:", error));
 }
+
+function displayTable() 
+{
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageData = allData.slice(start, end);
+
+  let table = "";
+  pageData.forEach(item => {
+    table += `<tr>
+      <td>${item.Name}</td>
+      <td>${item.Service}</td>
+      <td>${item.Time}</td>
+      <td>
+        <a href="https://wa.me/918860168841?text=Hi%20your%20appointment%20is%20at%20${encodeURIComponent(item.Time)}" target="_blank" style="text-decoration:none;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" 
+               alt="WhatsApp" 
+               style="width:24px; height:24px;">
+        </a>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById("tableBody").innerHTML = table;
+  updatePageInfo();
+}
+
+function updatePageInfo() {
+  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${totalPages}`;
+  document.getElementById("prevBtn").disabled = currentPage === 1;
+  document.getElementById("nextBtn").disabled = currentPage === totalPages;
+}
+
+function prevPage() {
+  if(currentPage > 1) {
+    currentPage--;
+    displayTable();
+  }
+}
+
+function nextPage() {
+  const totalPages = Math.ceil(allData.length / rowsPerPage);
+  if(currentPage < totalPages) {
+    currentPage++;
+    displayTable();
+  }
+}
+
+
+
+
+
 
 function submitForm() {
   let name = document.getElementById("name").value.trim();
