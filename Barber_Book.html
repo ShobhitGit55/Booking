@@ -6,15 +6,21 @@
 <title>Appointment Booking</title>
 
 <style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #667eea, #764ba2);
-    padding: 40px;
+    padding: 20px;
 }
 
 .container {
     background: white;
-    padding: 30px;
+    padding: 20px;
     border-radius: 12px;
     max-width: 600px;
     margin: auto;
@@ -23,44 +29,75 @@ body {
 
 h2 {
     text-align: center;
+    margin-bottom: 15px;
+    font-size: 1.6rem;
 }
 
 input, select {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
 button {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: #667eea;
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #5a67d8;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    width: 100%;
 }
 
 table {
     width: 100%;
     margin-top: 20px;
     border-collapse: collapse;
+    font-size: 0.9rem;
 }
 
 th, td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
+    white-space: nowrap;
 }
 
 th {
     background: #667eea;
     color: white;
 }
+
+@media (max-width: 480px) {
+    h2 {
+        font-size: 1.3rem;
+    }
+    input, select, button {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+    table {
+        font-size: 0.85rem;
+    }
+}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 <h2>Book Appointment</h2>
 
@@ -74,7 +111,6 @@ th {
 <option>Other</option>
 
 </select>
-<label for="time">Select Time:</label>
 <select id="time">
   <option value="">--Select Time--</option>
  
