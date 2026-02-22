@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Worksheet - Zoom & Rotate with Answers Save</title>
+<title>Worksheet - Zoom & Rotate with File Name Answers</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; margin:0; }
 h1 { text-align:center; color:#333; font-size:1.8em; margin-bottom:20px; }
@@ -44,7 +44,7 @@ h1 { text-align:center; color:#333; font-size:1.8em; margin-bottom:20px; }
 <div id="thankyou">Thank you! Your answers are saved.</div>
 
 <script>
-let images=[], rotations=[], scales=[];
+let images = [], rotations = [], scales = [];
 let selectedIndex = 0; // current selected image
 
 function loadImages() {
@@ -56,10 +56,10 @@ function loadImages() {
   images = []; rotations = []; scales = [];
   selectedIndex = 0;
 
-  // Load saved answers if exist
+  // Load saved answers keyed by file name
   const savedAnswers = JSON.parse(localStorage.getItem("studentAnswers") || "{}");
 
-  for(let i=0;i<files.length;i++){
+  for(let i=0; i<files.length; i++){
     const file = files[i];
     const reader = new FileReader();
 
@@ -84,7 +84,9 @@ function loadImages() {
       textarea.className = "answer-box";
       textarea.id = "answer"+i;
       textarea.placeholder = "Write your answer here...";
-      if(savedAnswers[i]) textarea.value = savedAnswers[i]; // preload saved answer
+
+      // Load saved answer if file name matches
+      if(savedAnswers[file.name]) textarea.value = savedAnswers[file.name];
 
       // Image container
       const imgContainer = document.createElement("div");
@@ -107,6 +109,7 @@ function loadImages() {
       // show control panel once first image loaded
       if(i===0) document.getElementById("controlPanel").style.display="block";
     };
+
     reader.readAsDataURL(file);
   }
 }
@@ -134,13 +137,15 @@ function resetImage(index){
   updateTransform(index);
 }
 
-// Save only answers
+// Save only answers keyed by file name
 function submitAnswers(){
-  const answers = {};
-  images.forEach((img,i)=>{
+  const answers = JSON.parse(localStorage.getItem("studentAnswers") || "{}");
+  const files = document.getElementById("fileInput").files;
+  for(let i=0; i<files.length; i++){
+    const file = files[i];
     const value = document.getElementById("answer"+i).value;
-    answers[i] = value;
-  });
+    answers[file.name] = value;  // Save answer by file name
+  }
   localStorage.setItem("studentAnswers", JSON.stringify(answers));
   document.getElementById("thankyou").style.display = "block";
 }
