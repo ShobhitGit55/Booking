@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Side-by-Side Worksheet</title>
+<title>Worksheet with Pinch, Drag, Rotate & Reset</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -41,18 +41,23 @@ h1 {
 .image-container {
   width:48%;
   text-align:center;
+  overflow:hidden;
+  position:relative;
 }
 .image-container img {
   max-width:100%;
   max-height:400px;
   border-radius:8px;
-  transition: transform 0.3s;
+  transition: transform 0.1s;
   object-fit: contain;
+  touch-action: none; /* needed for pinch & drag */
+  cursor: grab;
+  position: relative;
 }
 .button-group {
   margin-top:10px;
   display:flex;
-  justify-content: flex-start;
+  justify-content:flex-start;
   flex-wrap: wrap;
   gap:10px;
 }
@@ -74,7 +79,7 @@ button:hover { background:#45a049; }
   margin-top:20px;
   display:none;
 }
-@media (max-width: 600px) {
+@media (max-width:600px) {
   .answer-box, .image-container { width:100%; }
   .image-container img { max-height:300px; }
 }
@@ -95,6 +100,15 @@ button:hover { background:#45a049; }
 <script>
 let images = [];
 let rotations = [];
+let scales = [];
+let startDistance = 0;
+let currentImgIndex = null;
+let lastTouchEnd = 0;
+let startX = 0;
+let startY = 0;
+let translateX = [];
+let translateY = [];
+let isDragging = false;
 
 function loadImages() {
   const files = document.getElementById("fileInput").files;
@@ -104,6 +118,9 @@ function loadImages() {
   worksheetDiv.innerHTML = "";
   images = [];
   rotations = [];
+  scales = [];
+  translateX = [];
+  translateY = [];
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -113,6 +130,9 @@ function loadImages() {
       const imgURL = e.target.result;
       images.push(imgURL);
       rotations.push(0);
+      scales.push(1);
+      translateX.push(0);
+      translateY.push(0);
 
       const container = document.createElement("div");
       container.className = "question-container";
@@ -149,11 +169,14 @@ function loadImages() {
 
       imgContainer.appendChild(img);
       imgContainer.appendChild(btnGroup);
-
       container.appendChild(textarea);
       container.appendChild(imgContainer);
-
       worksheetDiv.appendChild(container);
+
+      // Pinch zoom & drag
+      img.addEventListener('touchstart', (e) => handleTouchStart(e, i));
+      img.addEventListener('touchmove', (e) => handleTouchMove(e, i));
+      img.addEventListener('touchend', (e) => handleTouchEnd(e, i));
     };
 
     reader.readAsDataURL(file);
@@ -162,13 +185,74 @@ function loadImages() {
 
 function rotateImage(index, degree) {
   rotations[index] += degree;
+  updateTransform(index);
+}
+
+function updateTransform(index) {
   const img = document.getElementById("img" + index);
-  img.style.transform = `rotate(${rotations[index]}deg)`;
+  img.style.transform = `translate(${translateX[index]}px, ${translateY[index]}px) rotate(${rotations[index]}deg) scale(${scales[index]})`;
+}
+
+function handleTouchStart(e, index) {
+  if (e.touches.length === 2) {
+    currentImgIndex = index;
+    startDistance = getDistance(e.touches[0], e.touches[1]);
+    e.preventDefault();
+  } else if (e.touches.length === 1) {
+    currentImgIndex = index;
+    isDragging = true;
+    startX = e.touches[0].clientX - translateX[index];
+    startY = e.touches[0].clientY - translateY[index];
+  }
+}
+
+function handleTouchMove(e, index) {
+  if (e.touches.length === 2 && currentImgIndex === index) {
+    const newDistance = getDistance(e.touches[0], e.touches[1]);
+    const delta = (newDistance - startDistance) / 200;
+    scales[index] += delta;
+    if (scales[index] < 0.1) scales[index] = 0.1;
+    startDistance = newDistance;
+    updateTransform(index);
+    e.preventDefault();
+  } else if (isDragging && e.touches.length === 1 && currentImgIndex === index) {
+    translateX[index] = e.touches[0].clientX - startX;
+    translateY[index] = e.touches[0].clientY - startY;
+    updateTransform(index);
+  }
+}
+
+function handleTouchEnd(e, index) {
+  isDragging = false;
+
+  // Detect double-tap for reset
+  const now = new Date().getTime();
+  if (now - lastTouchEnd <= 300) {
+    rotations[index] = 0;
+    scales[index] = 1;
+    translateX[index] = 0;
+    translateY[index] = 0;
+    updateTransform(index);
+  }
+  lastTouchEnd = now;
+}
+
+function getDistance(touch1, touch2) {
+  const dx = touch2.clientX - touch1.clientX;
+  const dy = touch2.clientY - touch1.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
 }
 
 function submitAnswers() {
   const answers = images.map((img, i) => {
-    return { image: img, answer: document.getElementById("answer"+i).value, rotation: rotations[i] };
+    return {
+      image: img,
+      answer: document.getElementById("answer"+i).value,
+      rotation: rotations[i],
+      scale: scales[i],
+      translateX: translateX[i],
+      translateY: translateY[i]
+    };
   });
   localStorage.setItem("studentAnswers", JSON.stringify(answers));
   document.getElementById("thankyou").style.display = "block";
