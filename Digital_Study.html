@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Desktop Worksheet Viewer</title>
+<title>Zoom & Rotate Worksheet</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -25,6 +25,7 @@ h1 {
   margin-bottom:20px;
   border-radius:8px;
   box-shadow:0 2px 5px rgba(0,0,0,0.1);
+  flex-wrap:wrap;
 }
 .answer-box {
   width:48%;
@@ -38,26 +39,31 @@ h1 {
 }
 .image-container {
   width:48%;
-  max-height:500px;
-  overflow:auto; /* scroll if image bigger */
   border:1px solid #ddd;
   border-radius:8px;
   text-align:center;
-  position:relative;
   background:#f9f9f9;
+  overflow:auto; /* scroll if image bigger than container */
+  padding:10px;
 }
-.image-container img {
-  max-width:none; /* allow zoom */
-  max-height:none;
-  transition: transform 0.2s;
+.image-wrapper {
+  display:inline-block; /* separate block for image */
+  margin-bottom:10px;
+}
+.image-wrapper img {
   display:block;
   margin:auto;
+  transition: transform 0.2s;
+  transform-origin: top center; /* zoom grows downward */
+  max-width:100%;
+  height:auto;
 }
 .button-group {
-  margin-top:10px;
   display:flex;
   flex-wrap:wrap;
   gap:10px;
+  justify-content:center;
+  margin-bottom:10px;
 }
 button {
   background:#4CAF50;
@@ -77,6 +83,9 @@ button:hover { background:#45a049; }
   color:#333;
   margin-top:20px;
   display:none;
+}
+@media (max-width:600px) {
+  .answer-box, .image-container { width:100%; margin-bottom:15px; }
 }
 </style>
 </head>
@@ -120,7 +129,7 @@ function loadImages() {
       const container = document.createElement("div");
       container.className="question-container";
 
-      // Answer
+      // Answer box
       const textarea = document.createElement("textarea");
       textarea.className="answer-box";
       textarea.id="answer"+i;
@@ -130,11 +139,17 @@ function loadImages() {
       const imgContainer = document.createElement("div");
       imgContainer.className="image-container";
 
+      const imgWrapper = document.createElement("div");
+      imgWrapper.className="image-wrapper";
+
       const img = document.createElement("img");
       img.src=imgURL;
       img.id="img"+i;
 
-      // Buttons
+      imgWrapper.appendChild(img);
+      imgContainer.appendChild(imgWrapper);
+
+      // Buttons outside image wrapper
       const btnGroup = document.createElement("div");
       btnGroup.className="button-group";
 
@@ -168,9 +183,7 @@ function loadImages() {
       btnGroup.appendChild(zoomOutBtn);
       btnGroup.appendChild(resetBtn);
 
-      imgContainer.appendChild(img);
       imgContainer.appendChild(btnGroup);
-
       container.appendChild(textarea);
       container.appendChild(imgContainer);
 
