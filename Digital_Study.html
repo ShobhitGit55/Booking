@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Worksheet Practice with Image</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; }
+h1 { text-align:center; color:#333; }
+#worksheet img { max-width: 100%; margin: 10px 0; border-radius: 8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.answer-box { width: 100%; padding: 8px; margin-bottom:20px; border-radius:4px; border:1px solid #ccc; resize: vertical; }
+button { background:#4CAF50; color:white; padding:12px 20px; border:none; border-radius:5px; cursor:pointer; font-size:16px; margin-top:10px; }
+button:hover { background:#45a049; }
+#thankyou { text-align:center; font-size:18px; color:#333; margin-top:20px; display:none; }
+</style>
+</head>
+<body>
+
+<h1>Student Worksheet</h1>
+
+<!-- Parent uploads images -->
+<input type="file" id="fileInput" accept="image/*" multiple>
+<button onclick="loadImages()">Load Worksheet</button>
+
+<div id="worksheet"></div>
+
+<button onclick="submitAnswers()">Submit</button>
+<div id="thankyou">Thank you! Your answers are saved.</div>
+
+<script>
+let images = [];
+
+function loadImages() {
+  const files = document.getElementById("fileInput").files;
+  if (!files.length) { alert("Please select at least one image"); return; }
+  
+  const worksheetDiv = document.getElementById("worksheet");
+  worksheetDiv.innerHTML = "";
+  images = [];
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      const imgURL = e.target.result;
+      images.push(imgURL);
+
+      const container = document.createElement("div");
+      container.style.marginBottom = "30px";
+
+      const img = document.createElement("img");
+      img.src = imgURL;
+
+      const textarea = document.createElement("textarea");
+      textarea.className = "answer-box";
+      textarea.id = "answer" + i;
+      textarea.rows = 3;
+      textarea.placeholder = "Write your answer here...";
+
+      container.appendChild(img);
+      container.appendChild(textarea);
+      worksheetDiv.appendChild(container);
+    };
+    
+    reader.readAsDataURL(file);
+  }
+}
+
+function submitAnswers() {
+  const answers = images.map((img, i) => {
+    return { image: img, answer: document.getElementById("answer"+i).value };
+  });
+
+  // Save in localStorage (for testing)
+  localStorage.setItem("studentAnswers", JSON.stringify(answers));
+  
+  document.getElementById("thankyou").style.display = "block";
+}
+</script>
+
+</body>
+</html>
