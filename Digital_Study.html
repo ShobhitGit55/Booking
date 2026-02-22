@@ -3,90 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Worksheet Zoom & Rotate - Buttons Outside</title>
+<title>Worksheet - Zoom & Rotate with Answers Save</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f5f5f5;
-  padding:20px;
-  margin:0;
-}
-h1 {
-  text-align:center;
-  color:#333;
-  font-size:1.8em;
-  margin-bottom:20px;
-}
-.question-container {
-  display:flex;
-  justify-content:space-between;
-  background:#fff;
-  padding:15px;
-  margin-bottom:20px;
-  border-radius:8px;
-  box-shadow:0 2px 5px rgba(0,0,0,0.1);
-  flex-wrap:wrap;
-  position:relative;
-}
-.answer-box {
-  width:48%;
-  min-height:250px;
-  padding:8px;
-  border-radius:4px;
-  border:1px solid #ccc;
-  font-size:1em;
-  overflow-y:auto;
-  resize:vertical;
-}
-.image-container {
-  width:48%;
-  border:1px solid #ddd;
-  border-radius:8px;
-  background:#f9f9f9;
-  overflow:auto; /* scroll if zoomed */
-  max-height:600px;
-  text-align:center;
-  padding:10px;
-}
-.image-wrapper {
-  display:inline-block;
-}
-.image-wrapper img {
-  display:block;
-  max-width:100%;
-  max-height:100%;
-  margin:auto;
-  transform-origin:center center;
-  transition: transform 0.2s;
-  cursor:grab;
-}
-#controlPanel {
-  margin-top:20px;
-  text-align:center;
-}
-#controlPanel button {
-  background:#4CAF50;
-  color:white;
-  padding:8px 14px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-  font-size:1em;
-  margin:5px;
-}
+body { font-family: Arial, sans-serif; background:#f5f5f5; padding:20px; margin:0; }
+h1 { text-align:center; color:#333; font-size:1.8em; margin-bottom:20px; }
+.question-container { display:flex; justify-content:space-between; background:#fff; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); flex-wrap:wrap; position:relative; cursor:pointer; }
+.answer-box { width:48%; min-height:250px; padding:8px; border-radius:4px; border:1px solid #ccc; font-size:1em; overflow-y:auto; resize:vertical; }
+.image-container { width:48%; border:1px solid #ddd; border-radius:8px; background:#f9f9f9; overflow:auto; max-height:600px; text-align:center; padding:10px; }
+.image-wrapper { display:inline-block; }
+.image-wrapper img { display:block; max-width:100%; max-height:100%; margin:auto; transform-origin:center center; transition: transform 0.2s; cursor:grab; }
+#controlPanel { margin-top:20px; text-align:center; }
+#controlPanel button { background:#4CAF50; color:white; padding:8px 14px; border:none; border-radius:5px; cursor:pointer; font-size:1em; margin:5px; }
 #controlPanel button:hover { opacity:0.9; }
 .rotate-btn { background:#2196F3; }
 .zoom-btn { background:#FF9800; }
-#thankyou {
-  text-align:center;
-  font-size:1.2em;
-  color:#333;
-  margin-top:20px;
-  display:none;
-}
-@media (max-width:600px) {
-  .answer-box, .image-container { width:100%; margin-bottom:15px; }
-}
+#thankyou { text-align:center; font-size:1.2em; color:#333; margin-top:20px; display:none; }
+@media (max-width:600px) { .answer-box, .image-container { width:100%; margin-bottom:15px; } }
 </style>
 </head>
 <body>
@@ -98,6 +30,7 @@ h1 {
 
 <div id="worksheet"></div>
 
+<!-- Control Panel outside image containers -->
 <div id="controlPanel" style="display:none;">
   <label>Control Selected Image:</label><br>
   <button class="rotate-btn" onclick="rotateImage(selectedIndex,-90)">⟲ Rotate Left</button>
@@ -112,51 +45,57 @@ h1 {
 
 <script>
 let images=[], rotations=[], scales=[];
-let selectedIndex = 0; // controls current selected image
+let selectedIndex = 0; // current selected image
 
 function loadImages() {
   const files = document.getElementById("fileInput").files;
   if(!files.length){ alert("Select at least one image"); return; }
 
-  const worksheetDiv=document.getElementById("worksheet");
-  worksheetDiv.innerHTML="";
-  images=[]; rotations=[]; scales=[];
+  const worksheetDiv = document.getElementById("worksheet");
+  worksheetDiv.innerHTML = "";
+  images = []; rotations = []; scales = [];
   selectedIndex = 0;
+
+  // Load saved answers if exist
+  const savedAnswers = JSON.parse(localStorage.getItem("studentAnswers") || "{}");
 
   for(let i=0;i<files.length;i++){
     const file = files[i];
     const reader = new FileReader();
 
-    reader.onload=function(e){
+    reader.onload = function(e){
       const imgURL = e.target.result;
-      images.push(imgURL); rotations.push(0); scales.push(1);
+      images.push(imgURL);
+      rotations.push(0);
+      scales.push(1);
 
-      const container=document.createElement("div");
-      container.className="question-container";
+      const container = document.createElement("div");
+      container.className = "question-container";
       container.dataset.index = i;
 
       // select image on click
-      container.onclick = function(){ 
+      container.onclick = function(){
         selectedIndex = i;
         document.getElementById("controlPanel").style.display="block";
       };
 
       // Answer box
-      const textarea=document.createElement("textarea");
-      textarea.className="answer-box";
-      textarea.id="answer"+i;
-      textarea.placeholder="Write your answer here...";
+      const textarea = document.createElement("textarea");
+      textarea.className = "answer-box";
+      textarea.id = "answer"+i;
+      textarea.placeholder = "Write your answer here...";
+      if(savedAnswers[i]) textarea.value = savedAnswers[i]; // preload saved answer
 
       // Image container
-      const imgContainer=document.createElement("div");
-      imgContainer.className="image-container";
+      const imgContainer = document.createElement("div");
+      imgContainer.className = "image-container";
 
-      const imgWrapper=document.createElement("div");
-      imgWrapper.className="image-wrapper";
+      const imgWrapper = document.createElement("div");
+      imgWrapper.className = "image-wrapper";
 
-      const img=document.createElement("img");
-      img.src=imgURL;
-      img.id="img"+i;
+      const img = document.createElement("img");
+      img.src = imgURL;
+      img.id = "img"+i;
 
       imgWrapper.appendChild(img);
       imgContainer.appendChild(imgWrapper);
@@ -172,36 +111,38 @@ function loadImages() {
   }
 }
 
+// Transform functions
 function updateTransform(index){
-  const img=document.getElementById("img"+index);
-  img.style.transform=`rotate(${rotations[index]}deg) scale(${scales[index]})`;
+  const img = document.getElementById("img"+index);
+  if(!img) return;
+  img.style.transform = `rotate(${rotations[index]}deg) scale(${scales[index]})`;
 }
-
 function rotateImage(index,degree){
   if(index===undefined) return;
-  rotations[index]+=degree;
+  rotations[index] += degree;
   updateTransform(index);
 }
-
 function zoomImage(index,delta){
   if(index===undefined) return;
-  scales[index]+=delta;
+  scales[index] += delta;
   if(scales[index]<0.1) scales[index]=0.1;
   updateTransform(index);
 }
-
 function resetImage(index){
   if(index===undefined) return;
   rotations[index]=0; scales[index]=1;
   updateTransform(index);
 }
 
+// Save only answers
 function submitAnswers(){
-  const answers=images.map((img,i)=>{
-    return { image:img, answer:document.getElementById("answer"+i).value, rotation:rotations[i], scale:scales[i] };
+  const answers = {};
+  images.forEach((img,i)=>{
+    const value = document.getElementById("answer"+i).value;
+    answers[i] = value;
   });
-  localStorage.setItem("studentAnswers",JSON.stringify(answers));
-  document.getElementById("thankyou").style.display="block";
+  localStorage.setItem("studentAnswers", JSON.stringify(answers));
+  document.getElementById("thankyou").style.display = "block";
 }
 </script>
 
